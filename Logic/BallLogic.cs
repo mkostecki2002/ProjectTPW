@@ -58,7 +58,7 @@ namespace Logic
             MoveBall(ball);
         }
 
-        private bool IsValidPosition(int x, int y, int radius)
+        public bool IsValidPosition(int x, int y, int radius)
         {
             if (x < 0 || x + radius >= width || y < 0 || y + radius >= height)
             {
@@ -113,7 +113,6 @@ namespace Logic
                             {
                                 collisionDetected = true;
 
-                                // Reverse directions of both balls
                                 ball.DeltaX *= -1;
                                 ball.DeltaY *= -1;
 
@@ -130,11 +129,10 @@ namespace Logic
                         }
                     }
 
-                    Debug.WriteLine($"Moved Ball: X={ball.X}, Y={ball.Y}, DeltaX={ball.DeltaX}, DeltaY={ball.DeltaY}");
+                    //Debug.WriteLine($"Moved Ball: X={ball.X}, Y={ball.Y}, DeltaX={ball.DeltaX}, DeltaY={ball.DeltaY}");
                     Thread.Sleep(5);
                 }
             }
         }
-
     }
 }
