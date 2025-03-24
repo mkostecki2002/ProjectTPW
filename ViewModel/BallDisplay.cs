@@ -8,9 +8,9 @@ namespace ViewModel
     {
         private Logic.BallLogic ballLogic;
 
-        public BallDisplay()
+        public BallDisplay(int width, int height)
         {
-            ballLogic = new BallLogic();
+            ballLogic = new BallLogic(width, height);
             Balls = new ObservableCollection<Ball>();
             Ball ball = new Ball(10, 20, 15);
             Ball ball2 = new Ball(30, 40, 25);

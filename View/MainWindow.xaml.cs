@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using ViewModel;
 using Data;
+using System.Diagnostics;
 
 namespace View
 {
@@ -15,14 +16,10 @@ namespace View
         public MainWindow()
         {
             InitializeComponent();
-            this.viewModel = new ViewModel.BallDisplay(); // Properly initialize viewModel
+            viewModel = new BallDisplay(800, 450); // Pass the width, height, and Dispatcher
             DataContext = viewModel;
 
-            ObservableCollection<Ball> Balls = viewModel.Balls;
-
-            Canvas canvas = new Canvas();
-            canvas.Children.Clear();
-            foreach (var ball in Balls)
+            foreach (var ball in viewModel.Balls)
             {
                 Ellipse ellipse = new Ellipse
                 {
@@ -30,15 +27,27 @@ namespace View
                     Height = ball.Radius * 2,
                     Fill = Brushes.Red
                 };
-                Canvas.SetLeft(ellipse, ball.X);
-                Canvas.SetTop(ellipse, ball.Y);
-                canvas.Children.Add(ellipse);
+                BallCanvas.Children.Add(ellipse);
+                UpdateBallPosition(ellipse, ball);
             }
 
-            // Add the canvas to the window's content
-            this.Content = canvas;
+            CompositionTarget.Rendering += OnRendering;
         }
 
+        private void OnRendering(object sender, EventArgs e)
+        {
+            foreach (var ball in viewModel.Balls)
+            {
+                Ellipse ellipse = (Ellipse)BallCanvas.Children[viewModel.Balls.IndexOf(ball)];
+                UpdateBallPosition(ellipse, ball);
+            }
+        }
+
+        private void UpdateBallPosition(Ellipse ellipse, Ball ball)
+        {
+            Canvas.SetLeft(ellipse, ball.X - ball.Radius);
+            Canvas.SetTop(ellipse, ball.Y - ball.Radius);
+        }
     }
 
 }
