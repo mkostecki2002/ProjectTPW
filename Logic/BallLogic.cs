@@ -1,15 +1,16 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
+using System.Linq;
 
 namespace Logic
 {
     public class BallLogic
     {
-        private readonly List<Ball> balls = new List<Ball>();
-        private readonly List<Thread> threads = new List<Thread>();
+        //private readonly List<Thread> threads = new List<Thread>();
         private readonly int width;
         private readonly int height;
         private readonly Random random = new Random();
@@ -20,18 +21,7 @@ namespace Logic
             this.height = height;
         }
 
-        public void AddBall(Ball ball)
-        {
-            lock (balls)
-            {
-                balls.Add(ball);
-            }
-            Thread thread = new Thread(() => InitializeBall(ball));
-            threads.Add(thread);
-            thread.Start();
-        }
-
-        private void InitializeBall(Ball ball)
+        public void InitializeBall(Ball ball, IEnumerable<Ball> balls)
         {
             bool positionFound = false;
             while (!positionFound)
@@ -39,7 +29,7 @@ namespace Logic
                 int x = random.Next(0, width);
                 int y = random.Next(0, height);
 
-                if (IsValidPosition(x, y, ball.Radius))
+                if (IsValidPosition(x, y, ball.Radius, balls))
                 {
                     ball.X = x;
                     ball.Y = y;
@@ -55,10 +45,11 @@ namespace Logic
                 ball.DeltaX = 1;
             }
 
-            MoveBall(ball);
+            Thread thread = new Thread(() => MoveBall(ball, balls));
+            thread.Start();
         }
 
-        public bool IsValidPosition(int x, int y, int radius)
+        public bool IsValidPosition(int x, int y, int radius, IEnumerable<Ball> balls)
         {
             if (x < 0 || x + radius >= width || y < 0 || y + radius >= height)
             {
@@ -69,7 +60,7 @@ namespace Logic
             {
                 foreach (var otherBall in balls)
                 {
-                    if (otherBall == null || otherBall == balls[balls.Count - 1]) continue;
+                    if (otherBall == null) continue;
 
                     double distance = Math.Sqrt(Math.Pow(x - otherBall.X, 2) + Math.Pow(y - otherBall.Y, 2));
                     if (distance < radius + otherBall.Radius)
@@ -81,7 +72,7 @@ namespace Logic
             return true;
         }
 
-        public void MoveBall(Ball ball)
+        public void MoveBall(Ball ball, IEnumerable<Ball> balls)
         {
             while (true)
             {
@@ -129,7 +120,6 @@ namespace Logic
                         }
                     }
 
-                    //Debug.WriteLine($"Moved Ball: X={ball.X}, Y={ball.Y}, DeltaX={ball.DeltaX}, DeltaY={ball.DeltaY}");
                     Thread.Sleep(5);
                 }
             }

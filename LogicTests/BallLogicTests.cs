@@ -41,6 +41,8 @@ namespace LogicTests
             Assert.True(result);
 
             result = ballLogic.IsValidPosition(x2, y, radius);
+
+            Assert.False(result);
         }
 
         [Fact]
