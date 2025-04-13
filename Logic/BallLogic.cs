@@ -10,7 +10,7 @@ namespace Logic
 {
     public class BallLogic
     {
-        //private readonly List<Thread> threads = new List<Thread>();
+        private readonly List<Thread> threads = new List<Thread>();
         private readonly int width;
         private readonly int height;
         private readonly Random random = new Random();
@@ -46,6 +46,7 @@ namespace Logic
             }
 
             Thread thread = new Thread(() => MoveBall(ball, balls));
+            threads.Add(thread);
             thread.Start();
         }
 
@@ -113,11 +114,15 @@ namespace Logic
                             }
                         }
 
+
                         if (!collisionDetected)
                         {
                             ball.X = newX;
                             ball.Y = newY;
                         }
+                        
+
+                        //System.Diagnostics.Debug.WriteLine($"Ball Position: {ball.X}, {ball.Y} Delta: {ball.DeltaX}, {ball.DeltaY} Radius: {ball.Radius}");
                     }
 
                     Thread.Sleep(5);
