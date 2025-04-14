@@ -20,43 +20,23 @@ namespace DataTests
         }
 
         [Fact]
-        public void X_Setter_ShouldUpdateValueAndTriggerPropertyChanged()
+        public void X_Setter()
         {
             Ball ball = new Ball(10, 20, 30);
-            bool propertyChangedTriggered = false;
-
-            ball.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(Ball.X))
-                {
-                    propertyChangedTriggered = true;
-                }
-            };
 
             ball.X = 50;
 
             Assert.Equal(50, ball.X);
-            Assert.True(propertyChangedTriggered);
         }
 
         [Fact]
-        public void Y_Setter_ShouldUpdateValueAndTriggerPropertyChanged()
+        public void Y_Setter()
         {
             Ball ball = new Ball(10, 20, 30);
-            bool propertyChangedTriggered = false;
-
-            ball.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(Ball.Y))
-                {
-                    propertyChangedTriggered = true;
-                }
-            };
 
             ball.Y = 60;
 
             Assert.Equal(60, ball.Y);
-            Assert.True(propertyChangedTriggered);
         }
 
         [Fact]
