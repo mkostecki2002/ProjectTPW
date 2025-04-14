@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Logic;
 using Model;
 
 namespace ViewModel
@@ -22,12 +23,20 @@ namespace ViewModel
         }
 
         private BallModel ballModel;
-        public ObservableCollection<Data.Ball> Balls => ballModel.Balls;
-
+        public ObservableCollection<Data.Ball> Balls
+        {
+            get
+            {
+                return new ObservableCollection<Data.Ball>(
+                    ballModel.Balls.OfType<Data.Ball>()
+                );
+            }
+        }
         public BallDisplay(int width, int height)
         {
-            
-            ballModel = new BallModel(1);
+
+            ILogicAPI logicAPI = new BallLogic(width, height); 
+            ballModel = new BallModel(1, logicAPI);
         }
         public void UpdateBallCount(int newCount)
         {
