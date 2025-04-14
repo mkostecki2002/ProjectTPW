@@ -2,7 +2,7 @@
 
 namespace Data
 {
-    public class Ball : INotifyPropertyChanged
+    public class Ball : INotifyPropertyChanged, IDataAPI
     {
         private int x;
         private int y;
