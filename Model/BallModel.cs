@@ -1,4 +1,5 @@
-﻿using Logic;
+﻿using Data;
+using Logic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
@@ -6,15 +7,14 @@ namespace Model
 {
     public class BallModel
     {
-        public ObservableCollection<object> Balls { get; set; }
-        private ILogicAPI ballLogic;
+        public ObservableCollection<Ball> Balls { get; set; }
+        private BallLogic ballLogic;
 
 
-        public BallModel(int numOfBalls, ILogicAPI logicAPI)
+        public BallModel(int numOfBalls)
         {
-            ballLogic = logicAPI;
-            //ballLogic = new BallLogic(800, 600);
-            Balls = new ObservableCollection<object>(ballLogic.GetBalls());
+            ballLogic = new BallLogic(800, 600);
+            Balls = new ObservableCollection<Ball>();
             for (int i = 0; i < numOfBalls; i++)
             {
                 AddBall();
@@ -23,24 +23,21 @@ namespace Model
 
         public void AddBall()
         {
-            ballLogic.AddBall();
-            RefreshBalls();
+            int x = Random.Shared.Next(0, 800);
+            int y = Random.Shared.Next(0, 600);
+            int radius = Random.Shared.Next(10, 50);
+            Ball newBall = new Ball(x, y, radius);
+            Balls.Add(newBall);
+            ballLogic.InitializeBall(newBall, Balls);
         }
 
         public void RemoveBall()
         {
-            ballLogic.RemoveBall();
-            RefreshBalls();
-        }
-
-        private void RefreshBalls()
-        {
-            Balls.Clear();
-            foreach (var ball in ballLogic.GetBalls())
+            if (Balls.Count > 0)
             {
-                Balls.Add(ball);
+                Ball ballToRemove = Balls.Last();
+                Balls.Remove(ballToRemove);
             }
         }
-
     }
 }

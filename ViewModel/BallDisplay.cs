@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Logic;
 using Model;
 
 namespace ViewModel
@@ -11,7 +10,7 @@ namespace ViewModel
         public bool CanExecute(object parameter) => true;
         public void Execute(object parameter)
         {
-         
+
         }
         public void Refresh()
         {
@@ -23,20 +22,12 @@ namespace ViewModel
         }
 
         private BallModel ballModel;
-        public ObservableCollection<Data.Ball> Balls
-        {
-            get
-            {
-                return new ObservableCollection<Data.Ball>(
-                    ballModel.Balls.OfType<Data.Ball>()
-                );
-            }
-        }
+        public ObservableCollection<Data.Ball> Balls => ballModel.Balls;
+
         public BallDisplay(int width, int height)
         {
 
-            ILogicAPI logicAPI = new BallLogic(width, height); 
-            ballModel = new BallModel(1, logicAPI);
+            ballModel = new BallModel(1);
         }
         public void UpdateBallCount(int newCount)
         {
@@ -59,6 +50,6 @@ namespace ViewModel
                 }
             }
         }
-    
+
     }
 }
