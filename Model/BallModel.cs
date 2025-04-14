@@ -37,7 +37,6 @@ namespace Model
             {
                 Ball ballToRemove = Balls.Last();
                 Balls.Remove(ballToRemove);
-                // Optionally, stop the thread for the removed ball
             }
         }
     }
