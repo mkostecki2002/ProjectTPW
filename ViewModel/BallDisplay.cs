@@ -10,7 +10,7 @@ namespace ViewModel
         public bool CanExecute(object parameter) => true;
         public void Execute(object parameter)
         {
-            // Logic to execute when the command is triggered
+         
         }
         public void Refresh()
         {
