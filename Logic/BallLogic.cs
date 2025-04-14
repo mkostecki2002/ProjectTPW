@@ -5,6 +5,7 @@ namespace Logic
 {
     public class BallLogic : ILogicAPI
     {
+        private readonly List<Ball> balls = new List<Ball>();
         private readonly List<Thread> threads = new List<Thread>();
         private readonly int width;
         private readonly int height;
@@ -15,8 +16,33 @@ namespace Logic
             this.width = width;
             this.height = height;
         }
+        public IEnumerable<object> GetBalls()
+        {
+            return balls.Cast<object>();
+        }
 
-        public void InitializeBall(Ball ball, IEnumerable<Ball> balls)
+        public void AddBall()
+        {
+            int x = random.Next(0, width);
+            int y = random.Next(0, height);
+            int diameter = random.Next(10, 50);
+            Ball newBall = new Ball(x, y, diameter);
+            balls.Add(newBall);
+            InitializeBall(newBall, balls);
+            Debug.WriteLine($"Added Ball: X={newBall.X}, Y={newBall.Y}, Diameter={newBall.Diameter}");
+
+        }
+
+        public void RemoveBall()
+        {
+            if (balls.Count > 0)
+            {
+                Ball ballToRemove = balls.Last();
+                balls.Remove(ballToRemove);
+            }
+        }
+
+        public void InitializeBall(IDataAPI ball, IEnumerable<Ball> balls)
         {
             bool positionFound = false;
             while (!positionFound)
@@ -68,7 +94,7 @@ namespace Logic
             return true;
         }
 
-        public void MoveBall(Ball ball, IEnumerable<Ball> balls)
+        public void MoveBall(IDataAPI ball, IEnumerable<Ball> balls)
         {
             while (true)
             {
