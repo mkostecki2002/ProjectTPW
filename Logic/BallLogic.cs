@@ -1,10 +1,12 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using Data;
 
 namespace Logic
 {
     public class BallLogic : ILogicAPI
     {
+        public ObservableCollection<Ball> Balls = new ObservableCollection<Ball>();
         private readonly List<Thread> threads = new List<Thread>();
         private readonly int width;
         private readonly int height;
@@ -119,10 +121,18 @@ namespace Logic
                         break;
                     }
                 }
-                //Debug.WriteLine($"Moved Ball: Diameter={ball.Diameter}, radious={ballRadius} X={ball.X}, Y={ball.Y}, DeltaX={ball.DeltaX}, DeltaY={ball.DeltaY}");
-                //Debug.WriteLine($"Wall width={width}, Heigh={height}");
+                
                 Thread.Sleep(16);
             }
+        }
+        public void AddBall()
+        {
+            int x = Random.Shared.Next(0, 800);
+            int y = Random.Shared.Next(0, 600);
+            int radius = Random.Shared.Next(10, 50);
+            Ball newBall = new Ball(x, y, radius);
+            Balls.Add(newBall);
+            InitializeBall(newBall, Balls);
         }
 
 

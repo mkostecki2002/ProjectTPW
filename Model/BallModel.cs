@@ -7,28 +7,23 @@ namespace Model
 {
     public class BallModel
     {
-        public ObservableCollection<Ball> Balls { get; set; }
+        public ObservableCollection<Ball> Balls;
         private BallLogic ballLogic;
 
 
         public BallModel(int numOfBalls)
         {
             ballLogic = new BallLogic(800, 600);
-            Balls = new ObservableCollection<Ball>();
+            Balls = ballLogic.Balls;
             for (int i = 0; i < numOfBalls; i++)
             {
-                AddBall();
+                ballLogic.AddBall();
             }
         }
 
         public void AddBall()
         {
-            int x = Random.Shared.Next(0, 800);
-            int y = Random.Shared.Next(0, 600);
-            int radius = Random.Shared.Next(10, 50);
-            Ball newBall = new Ball(x, y, radius);
-            Balls.Add(newBall);
-            ballLogic.InitializeBall(newBall, Balls);
+            ballLogic.AddBall();
         }
 
         public void RemoveBall()

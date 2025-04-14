@@ -21,7 +21,9 @@
         <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="0,10,0,10">
             <Label Content="Wprowadź liczbę kulek" Foreground="White" Margin="0,0,0,10"/>
             <TextBox x:Name="BallCountTextBox" Text="4" Width="120" Margin="0,0,0,10"/>
-            <Button Content="Uruchom" Width="100" Height="30" Click="UpdateBallCount_Click"/>
+            <Button Content="Uruchom" Width="100" Height="30" 
+                    Command="{Binding UpdateBallCountCommand}"
+                    CommandParameter="{Binding Text, ElementName=BallCountTextBox}"/>
         </StackPanel>
 
 
