@@ -15,7 +15,6 @@ namespace View
         public MainWindow()
         {
             InitializeComponent();
-
             ballDisplay = new BallDisplay(800, 600);
             DataContext = ballDisplay;
         }

@@ -6,7 +6,7 @@ namespace Data
     {
         private int x;
         private int y;
-        private int radius;
+        private int diameter;
 
         public int X
         {
@@ -34,26 +34,26 @@ namespace Data
             }
         }
 
-        public int Radius
+        public int Diameter
         {
-            get => radius;
+            get => diameter;
             set
             {
-                if (radius != value)
+                if (diameter != value)
                 {
-                    radius = value;
-                    OnPropertyChanged(nameof(Radius));
+                    diameter = value;
+                    OnPropertyChanged(nameof(Diameter));
                 }
             }
         }
         public int DeltaX { get; set; }
         public int DeltaY { get; set; }
 
-        public Ball(int x, int y, int radius)
+        public Ball(int x, int y, int diameter)
         {
             X = x;
             Y = y;
-            Radius = radius;
+            Diameter = diameter;
             DeltaX = 1;
             DeltaY = 1; 
         }

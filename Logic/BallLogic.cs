@@ -1,10 +1,4 @@
 ﻿using Data;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Threading;
-using System.Linq;
 
 namespace Logic
 {
@@ -29,7 +23,7 @@ namespace Logic
                 int x = random.Next(0, width);
                 int y = random.Next(0, height);
 
-                if (IsValidPosition(x, y, ball.Radius, balls))
+                if (IsValidPosition(x, y, ball.Diameter, balls))
                 {
                     ball.X = x;
                     ball.Y = y;
@@ -50,9 +44,9 @@ namespace Logic
             thread.Start();
         }
 
-        public bool IsValidPosition(int x, int y, int radius, IEnumerable<Ball> balls)
+        public bool IsValidPosition(int x, int y, int diameter, IEnumerable<Ball> balls)
         {
-            if (x < 0 || x + radius >= width || y < 0 || y + radius >= height)
+            if (x < 0 || x + (diameter / 2) >= width || y < 0 || y + (diameter / 2) >= height)
             {
                 return false;
             }
@@ -64,7 +58,7 @@ namespace Logic
                     if (otherBall == null) continue;
 
                     double distance = Math.Sqrt(Math.Pow(x - otherBall.X, 2) + Math.Pow(y - otherBall.Y, 2));
-                    if (distance < radius + otherBall.Radius)
+                    if (distance < (diameter / 2) + (otherBall.Diameter / 2))
                     {
                         return false;
                     }
@@ -82,8 +76,10 @@ namespace Logic
                     int newX = ball.X + ball.DeltaX;
                     int newY = ball.Y + ball.DeltaY;
 
-                    bool isWallCollisionX = newX - ball.Radius < 0 || newX + ball.Radius > width;
-                    bool isWallCollisionY = newY - ball.Radius < 0 || newY + ball.Radius > height;
+                    int ballRadius = ball.Diameter / 2;
+
+                    bool isWallCollisionX = newX - ballRadius < 0 || newX + ballRadius > width;
+                    bool isWallCollisionY = newY - ballRadius < 0 || newY + ballRadius > height;
 
                     if (isWallCollisionX || isWallCollisionY)
                     {
@@ -101,7 +97,7 @@ namespace Logic
                                 continue;
 
                             double distance = Math.Sqrt(Math.Pow(newX - otherBall.X, 2) + Math.Pow(newY - otherBall.Y, 2));
-                            if (distance < ball.Radius + otherBall.Radius)
+                            if (distance < ballRadius + (otherBall.Diameter / 2))
                             {
                                 collisionDetected = true;
 
@@ -122,10 +118,9 @@ namespace Logic
                         }
                         
 
-                        //System.Diagnostics.Debug.WriteLine($"Ball Position: {ball.X}, {ball.Y} Delta: {ball.DeltaX}, {ball.DeltaY} Radius: {ball.Radius}");
-                    }
+                     }
 
-                    Thread.Sleep(5);
+                    Thread.Sleep(16);
                 }
             }
         }
