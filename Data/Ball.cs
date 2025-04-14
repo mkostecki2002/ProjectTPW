@@ -1,20 +1,68 @@
-﻿namespace Data
+﻿using System.ComponentModel;
+
+namespace Data
 {
-    public class Ball
+    public class Ball : INotifyPropertyChanged
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Radius { get; set; }
+        private int x;
+        private int y;
+        private int diameter;
+
+        public int X
+        {
+            get => x;
+            set
+            {
+                if (x != value)
+                {
+                    x = value;
+                    OnPropertyChanged(nameof(X));
+                }
+            }
+        }
+
+        public int Y
+        {
+            get => y;
+            set
+            {
+                if (y != value)
+                {
+                    y = value;
+                    OnPropertyChanged(nameof(Y));
+                }
+            }
+        }
+
+        public int Diameter
+        {
+            get => diameter;
+            set
+            {
+                if (diameter != value)
+                {
+                    diameter = value;
+                    OnPropertyChanged(nameof(Diameter));
+                }
+            }
+        }
         public int DeltaX { get; set; }
         public int DeltaY { get; set; }
 
-        public Ball(int x, int y, int radius)
+        public Ball(int x, int y, int diameter)
         {
             X = x;
             Y = y;
-            Radius = radius;
+            Diameter = diameter;
             DeltaX = 1;
-            DeltaY = 1;
+            DeltaY = 1; 
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
