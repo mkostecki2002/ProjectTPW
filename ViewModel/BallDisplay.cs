@@ -4,52 +4,78 @@ using Model;
 
 namespace ViewModel
 {
-    public class BallDisplay : ICommand
+    public class BallDisplay
     {
-        public event EventHandler CanExecuteChanged;
-        public bool CanExecute(object parameter) => true;
-        public void Execute(object parameter)
-        {
-
-        }
-        public void Refresh()
-        {
-            // Logic to refresh the display
-        }
-        public void Stop()
-        {
-            // Logic to stop the display
-        }
-
+        private int ballsCount = 4;
         private BallModel ballModel;
-        public ObservableCollection<Data.Ball> Balls => ballModel.Balls;
+
+        public ObservableCollection<Data.Ball> Balls { get; set; }
+
+        public ICommand UpdateBallCountCommand { get; }
+
+        public event EventHandler? CanExecuteChanged;
+
+        public bool CanExecute(object? parameter)
+        {
+            return parameter is string text && !string.IsNullOrWhiteSpace(text);
+        }
+
+        public void Execute(object? parameter) 
+        {
+            if (parameter is string text && int.TryParse(text, out int newCount))
+            {
+                if (newCount > 0)
+                {
+                    ballModel.Balls.Clear();
+                    ballsCount = newCount;
+                    for (int i = 0; i < newCount; i++)
+                    {
+                        ballModel.AddBall();
+                    }
+                }
+                
+            }
+        }
 
         public BallDisplay(int width, int height)
         {
-
-            ballModel = new BallModel(1);
+            ballModel = new BallModel(ballsCount);
+            Balls = ballModel.Balls;
+            UpdateBallCountCommand = new RelayCommand(Execute, CanExecute);
         }
-        public void UpdateBallCount(int newCount)
+    }
+
+    internal class RelayCommand : ICommand
+    {
+        private readonly Action<object?> execute;
+        private readonly Predicate<object?> canExecute;
+        public RelayCommand(Action<object?> execute, Predicate<object?> canExecute)
         {
-            int currentCount = Balls.Count;
-
-            if (newCount > currentCount)
-            {
-                // Add new balls
-                for (int i = 0; i < newCount - currentCount; i++)
-                {
-                    ballModel.AddBall();
-                }
-            }
-            else if (newCount < currentCount)
-            {
-                // Remove excess balls
-                for (int i = 0; i < currentCount - newCount; i++)
-                {
-                    ballModel.RemoveBall();
-                }
-            }
+            this.execute = execute;
+            this.canExecute = canExecute;
+        }
+        public bool CanExecute(object? parameter)
+        {
+            return canExecute(parameter);
+        }
+        public void Execute(object? parameter)
+        {
+            execute(parameter);
+        }
+        public event EventHandler? CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
         }
 
+    }
+
+    internal class CommandManager
+    {
+        public static event EventHandler? RequerySuggested;
+        public static void InvalidateRequerySuggested()
+        {
+            RequerySuggested?.Invoke(null, EventArgs.Empty);
+        }
     }
 }
