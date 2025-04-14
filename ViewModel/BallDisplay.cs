@@ -1,25 +1,33 @@
 ﻿using System.Collections.ObjectModel;
-using Data;
-using Logic;
+using System.Windows.Input;
+using Model;
 
 namespace ViewModel
 {
-    public class BallDisplay
+    public class BallDisplay : ICommand
     {
-        private Logic.BallLogic ballLogic;
+        public event EventHandler CanExecuteChanged;
+        public bool CanExecute(object parameter) => true;
+        public void Execute(object parameter)
+        {
+            // Logic to execute when the command is triggered
+        }
+        public void Refresh()
+        {
+            // Logic to refresh the display
+        }
+        public void Stop()
+        {
+            // Logic to stop the display
+        }
+
+        private BallModel ballModel;
+        public ObservableCollection<Data.Ball> Balls => ballModel.Balls;
 
         public BallDisplay(int width, int height)
         {
-            ballLogic = new BallLogic(width, height);
-            Balls = new ObservableCollection<Ball>();
-            Ball ball = new Ball(10, 20, 15);
-            Ball ball2 = new Ball(30, 40, 25);
-            Balls.Add(ball);
-            Balls.Add(ball2);
-            ballLogic.AddBall(ball);
-            ballLogic.AddBall(ball2);
+            
+            ballModel = new BallModel(4);
         }
-
-        public ObservableCollection<Ball> Balls { get; set; }
     }
 }
