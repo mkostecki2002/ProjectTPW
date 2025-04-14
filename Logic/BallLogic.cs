@@ -3,7 +3,7 @@ using Data;
 
 namespace Logic
 {
-    public class BallLogic
+    public class BallLogic : ILogicAPI
     {
         private readonly List<Thread> threads = new List<Thread>();
         private readonly int width;

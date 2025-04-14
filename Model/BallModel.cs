@@ -1,6 +1,7 @@
 ﻿using Data;
 using Logic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Model
 {
@@ -8,6 +9,7 @@ namespace Model
     {
         public ObservableCollection<Ball> Balls { get; set; }
         private BallLogic ballLogic;
+
 
         public BallModel(int numOfBalls)
         {

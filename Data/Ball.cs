@@ -18,7 +18,6 @@ namespace Data
                 if (x != value)
                 {
                     x = value;
-                    OnPropertyChanged(nameof(X));
                     OnPropertyChanged(nameof(CanvasLeft));
                 }
             }
@@ -32,7 +31,6 @@ namespace Data
                 if (y != value)
                 {
                     y = value;
-                    OnPropertyChanged(nameof(Y));
                     OnPropertyChanged(nameof(CanvasTop));
                 }
             }
