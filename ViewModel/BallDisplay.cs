@@ -27,7 +27,29 @@ namespace ViewModel
         public BallDisplay(int width, int height)
         {
             
-            ballModel = new BallModel(4);
+            ballModel = new BallModel(1);
         }
+        public void UpdateBallCount(int newCount)
+        {
+            int currentCount = Balls.Count;
+
+            if (newCount > currentCount)
+            {
+                // Add new balls
+                for (int i = 0; i < newCount - currentCount; i++)
+                {
+                    ballModel.AddBall();
+                }
+            }
+            else if (newCount < currentCount)
+            {
+                // Remove excess balls
+                for (int i = 0; i < currentCount - newCount; i++)
+                {
+                    ballModel.RemoveBall();
+                }
+            }
+        }
+    
     }
 }

@@ -18,5 +18,16 @@ namespace View
             ballDisplay = new BallDisplay(800, 600);
             DataContext = ballDisplay;
         }
+        private void UpdateBallCount_Click(object sender, RoutedEventArgs e)
+        {
+            if (int.TryParse(BallCountTextBox.Text, out int newCount))
+            {
+                ballDisplay.UpdateBallCount(newCount);
+            }
+            else
+            {
+                MessageBox.Show("Please enter a valid number.");
+            }
+        }
     }
 }

@@ -20,9 +20,10 @@
         <!-- Panel z kontrolkami -->
         <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="0,10,0,10">
             <Label Content="Wprowadź liczbę kulek" Foreground="White" Margin="0,0,0,10"/>
-            <TextBox Text="4" Width="120" Margin="0,0,0,10"/>
-            <Button Content="Uruchom" Width="100" Height="30"/>
+            <TextBox x:Name="BallCountTextBox" Text="4" Width="120" Margin="0,0,0,10"/>
+            <Button Content="Uruchom" Width="100" Height="30" Click="UpdateBallCount_Click"/>
         </StackPanel>
+
 
         <!-- Wyświetlanie kulek -->
         <Border Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="DarkGray" BorderThickness="1">
@@ -43,8 +44,8 @@
                 </ItemsControl.ItemTemplate>
                 <ItemsControl.ItemContainerStyle>
                     <Style>
-                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                        <Setter Property="Canvas.Top" Value="{Binding CanvasTop}" />
+                        <Setter Property="Canvas.Left" Value="{Binding CanvasLeft}" />
                     </Style>
                 </ItemsControl.ItemContainerStyle>
             </ItemsControl>

@@ -7,6 +7,8 @@ namespace Data
         private int x;
         private int y;
         private int diameter;
+        public int CanvasLeft => X - Diameter / 2;
+        public int CanvasTop => Y - Diameter / 2;
 
         public int X
         {
@@ -17,6 +19,7 @@ namespace Data
                 {
                     x = value;
                     OnPropertyChanged(nameof(X));
+                    OnPropertyChanged(nameof(CanvasLeft));
                 }
             }
         }
@@ -30,6 +33,7 @@ namespace Data
                 {
                     y = value;
                     OnPropertyChanged(nameof(Y));
+                    OnPropertyChanged(nameof(CanvasTop));
                 }
             }
         }
@@ -39,10 +43,16 @@ namespace Data
             get => diameter;
             set
             {
+                if (value <= 0)
+                {
+                    throw new ArgumentException("Diameter must be a positive value.");
+                }
                 if (diameter != value)
                 {
                     diameter = value;
                     OnPropertyChanged(nameof(Diameter));
+                    OnPropertyChanged(nameof(CanvasLeft)); 
+                    OnPropertyChanged(nameof(CanvasTop));
                 }
             }
         }
@@ -64,5 +74,6 @@ namespace Data
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
     }
 }

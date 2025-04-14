@@ -1,4 +1,5 @@
-﻿using Data;
+﻿using System.Diagnostics;
+using Data;
 
 namespace Logic
 {
@@ -71,15 +72,17 @@ namespace Logic
         {
             while (true)
             {
+                int newX, newY, ballRadius;
+                List<Ball> ballsSnapshot;
+
                 lock (balls)
                 {
-                    int newX = ball.X + ball.DeltaX;
-                    int newY = ball.Y + ball.DeltaY;
+                    newX = ball.X + ball.DeltaX;
+                    newY = ball.Y + ball.DeltaY;
+                    ballRadius = ball.Diameter / 2;
 
-                    int ballRadius = ball.Diameter / 2;
-
-                    bool isWallCollisionX = newX - ballRadius < 0 || newX + ballRadius > width;
-                    bool isWallCollisionY = newY - ballRadius < 0 || newY + ballRadius > height;
+                    bool isWallCollisionX = newX - ballRadius < 0 || newX + ballRadius >= width;
+                    bool isWallCollisionY = newY - ballRadius < 0 || newY + ballRadius >= height;
 
                     if (isWallCollisionX || isWallCollisionY)
                     {
@@ -90,39 +93,38 @@ namespace Logic
                     }
                     else
                     {
-                        bool collisionDetected = false;
-                        foreach (var otherBall in balls)
-                        {
-                            if (otherBall == null || otherBall == ball)
-                                continue;
+                        ball.X = newX;
+                        ball.Y = newY;
+                    }
 
-                            double distance = Math.Sqrt(Math.Pow(newX - otherBall.X, 2) + Math.Pow(newY - otherBall.Y, 2));
-                            if (distance < ballRadius + (otherBall.Diameter / 2))
-                            {
-                                collisionDetected = true;
-
-                                ball.DeltaX *= -1;
-                                ball.DeltaY *= -1;
-
-                                otherBall.DeltaX *= -1;
-                                otherBall.DeltaY *= -1;
-                                break;
-                            }
-                        }
-
-
-                        if (!collisionDetected)
-                        {
-                            ball.X = newX;
-                            ball.Y = newY;
-                        }
-                        
-
-                     }
-
-                    Thread.Sleep(16);
+                    ballsSnapshot = balls.ToList();
                 }
+
+                foreach (var otherBall in ballsSnapshot)
+                {
+                    if (otherBall == null || otherBall == ball)
+                        continue;
+
+                    double distance = Math.Sqrt(Math.Pow(newX - otherBall.X, 2) + Math.Pow(newY - otherBall.Y, 2));
+                    if (distance < ballRadius + (otherBall.Diameter / 2))
+                    {
+                        ball.DeltaX *= -1;
+                        ball.DeltaY *= -1;
+
+                        lock (balls)
+                        {
+                            otherBall.DeltaX *= -1;
+                            otherBall.DeltaY *= -1;
+                        }
+                        break;
+                    }
+                }
+                //Debug.WriteLine($"Moved Ball: Diameter={ball.Diameter}, radious={ballRadius} X={ball.X}, Y={ball.Y}, DeltaX={ball.DeltaX}, DeltaY={ball.DeltaY}");
+                //Debug.WriteLine($"Wall width={width}, Heigh={height}");
+                Thread.Sleep(16);
             }
         }
+
+
     }
 }

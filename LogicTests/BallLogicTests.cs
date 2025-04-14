@@ -53,7 +53,7 @@ namespace LogicTests
         [Fact]
         public void MoveBall_Test()
         {
-            Ball ball = new Ball(50, 50, 10)
+            Ball ball = new Ball(795, 50, 10)
             {
                 DeltaX = 1,
                 DeltaY = 1
@@ -68,5 +68,28 @@ namespace LogicTests
             Assert.NotEqual(50, ball.Y);
 
         }
+        [Fact]
+        public void MoveBall_WallCollision_Test()
+        {
+            // Arrange: Create a ball near the right wall
+            Ball ball = new Ball(95, 50, 10) // Ball's diameter is 10, so radius is 5
+            {
+                DeltaX = 1, // Moving right
+                DeltaY = 0  // No vertical movement
+            };
+
+            // Act: Start the MoveBall method in a separate thread
+            Thread thread = new Thread(() => ballLogic.MoveBall(ball, balls));
+            thread.Start();
+
+            // Allow some time for the ball to move and collide
+            Thread.Sleep(50);
+
+            // Assert: Check if the ball reversed its horizontal direction
+            Assert.Equal(-1, ball.DeltaX); // Ball should reverse direction on X-axis
+            Assert.Equal(0, ball.DeltaY);  // Y-axis movement should remain unchanged
+
+        }
+
     }
 }
