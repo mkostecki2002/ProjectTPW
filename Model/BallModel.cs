@@ -34,5 +34,9 @@ namespace Model
                 Balls.Remove(ballToRemove);
             }
         }
+        public void StopAllThreads()
+        {
+            ballLogic.StopAllThreads();
+        }
     }
 }

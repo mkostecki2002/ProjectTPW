@@ -26,7 +26,9 @@ namespace ViewModel
             {
                 if (newCount > 0)
                 {
+
                     ballModel.Balls.Clear();
+                    ballModel.StopAllThreads();
                     ballsCount = newCount;
                     for (int i = 0; i < newCount; i++)
                     {

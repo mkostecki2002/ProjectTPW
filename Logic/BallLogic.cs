@@ -11,6 +11,8 @@ namespace Logic
         private readonly int width;
         private readonly int height;
         private readonly Random random = new Random();
+        private bool stopThreads = false; // Flag to stop threads
+
 
         public BallLogic(int width, int height)
         {
@@ -23,8 +25,8 @@ namespace Logic
             bool positionFound = false;
             while (!positionFound)
             {
-                int x = random.Next(0, width);
-                int y = random.Next(0, height);
+                int x = random.Next(50, width-50);
+                int y = random.Next(50, height-50);
 
                 if (IsValidPosition(x, y, ball.Diameter, balls))
                 {
@@ -72,7 +74,7 @@ namespace Logic
 
         public void MoveBall(Ball ball, IEnumerable<Ball> balls)
         {
-            while (true)
+            while (!stopThreads)
             {
                 int newX, newY, ballRadius;
                 List<Ball> ballsSnapshot;
@@ -121,9 +123,21 @@ namespace Logic
                         break;
                     }
                 }
-                
                 Thread.Sleep(16);
             }
+        }
+        public void StopAllThreads()
+        {
+            stopThreads = true; 
+            foreach (var thread in threads)
+            {
+                if (thread.IsAlive)
+                {
+                    thread.Join();
+                }
+            }
+            threads.Clear(); 
+            stopThreads = false; 
         }
         public void AddBall()
         {
