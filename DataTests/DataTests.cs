@@ -1,7 +1,4 @@
 using Data;
-using System;
-using System.ComponentModel;
-using Xunit;
 
 namespace DataTests
 {
