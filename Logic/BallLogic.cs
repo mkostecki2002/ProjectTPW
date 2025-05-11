@@ -4,12 +4,11 @@ namespace Logic
 {
     public class BallLogic : ILogicAPI
     {
-        private readonly List<Thread> threads = new List<Thread>();
+        private readonly List<Thread> threads = new();
         private readonly int width;
         private readonly int height;
-        private readonly Random random = new Random();
+        private readonly Random random = new();
         private bool stopThreads = false;
-
 
         public BallLogic(int width, int height)
         {
@@ -22,32 +21,36 @@ namespace Logic
             bool positionFound = false;
             while (!positionFound)
             {
-                int x = random.Next(50, width-50);
-                int y = random.Next(50, height-50);
+                double x = random.Next(50, width - 50);
+                double y = random.Next(50, height - 50);
+                Vector position = new(x, y);
 
-                if (IsValidPosition(x, y, ball.Diameter, balls))
+                if (IsValidPosition(position, ball.Diameter, balls))
                 {
-                    ball.X = x;
-                    ball.Y = y;
+                    ball.Position = position;
                     positionFound = true;
                 }
             }
 
-            ball.DeltaX = random.Next(-1, 2);
-            ball.DeltaY = random.Next(-1, 2);
+            Vector velocity = new(random.Next(-1, 2), random.Next(-1, 2));
 
-            if (ball.DeltaX == 0 && ball.DeltaY == 0)
+            if (velocity.X == 0 && velocity.Y == 0)
             {
-                ball.DeltaX = 1;
+                velocity = new Vector(1, 1);
             }
+
+            ball.Velocity = velocity;
 
             Thread thread = new Thread(() => MoveBall(ball, balls));
             threads.Add(thread);
             thread.Start();
         }
 
-        public bool IsValidPosition(int x, int y, int diameter, IEnumerable<Ball> balls)
+        public bool IsValidPosition(Vector position, double diameter, IEnumerable<Ball> balls)
         {
+            double x = position.X;
+            double y = position.Y;
+
             if (x < 0 || x + (diameter / 2) >= width || y < 0 || y + (diameter / 2) >= height)
             {
                 return false;
@@ -59,7 +62,11 @@ namespace Logic
                 {
                     if (otherBall == null) continue;
 
-                    double distance = Math.Sqrt(Math.Pow(x - otherBall.X, 2) + Math.Pow(y - otherBall.Y, 2));
+                    double distance = Math.Sqrt(
+                        Math.Pow(x - otherBall.Position.X, 2) +
+                        Math.Pow(y - otherBall.Position.Y, 2)
+                    );
+
                     if (distance < (diameter / 2) + (otherBall.Diameter / 2))
                     {
                         return false;
@@ -73,50 +80,56 @@ namespace Logic
         {
             while (!stopThreads)
             {
-                int newX = ball.X + ball.DeltaX;
-                int newY = ball.Y + ball.DeltaY;
-                int ballRadius = ball.Diameter / 2;
+                double ballRadius = ball.Diameter / 2;
 
-                bool isWallCollisionX = newX - ballRadius < 0 || newX + ballRadius >= width;
-                bool isWallCollisionY = newY - ballRadius < 0 || newY + ballRadius >= height;
+                Vector newPos = ball.Position + ball.Velocity;
 
-                if (isWallCollisionX) ball.DeltaX *= -1;
-                if (isWallCollisionY) ball.DeltaY *= -1;
+                if (newPos.X - ballRadius < 0 || newPos.X + ballRadius >= width)
+                    ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
 
-                if (!isWallCollisionX && !isWallCollisionY)
+                if (newPos.Y - ballRadius < 0 || newPos.Y + ballRadius >= height)
+                    ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
+
+                lock (balls)
                 {
-                    lock(balls)
-                    {
-                        ball.X = newX;
-                        ball.Y = newY;
-                    }
-                }
+                    ball.Position += ball.Velocity;
 
-                foreach (var otherBall in balls)
-                {
-                    if (otherBall == null || otherBall == ball)
-                        continue;
-
-                    double distance = Math.Sqrt(Math.Pow(ball.X - otherBall.X, 2) + Math.Pow(ball.Y - otherBall.Y, 2));
-                    if (distance < ballRadius + (otherBall.Diameter / 2))
+                    foreach (var other in balls)
                     {
-                        lock (balls) 
-                        { 
-                            ball.DeltaX *= -1;
-                            ball.DeltaY *= -1;
-                            otherBall.DeltaX *= -1;
-                            otherBall.DeltaY *= -1;
-                            break;
+                        if (other == null || other == ball) continue;
+
+                        double dx = ball.Position.X - other.Position.X;
+                        double dy = ball.Position.Y - other.Position.Y;
+                        double dist = Math.Sqrt(dx * dx + dy * dy);
+
+                        double sumRadius = ball.Diameter / 2.0 + other.Diameter / 2.0;
+
+                        if (dist < sumRadius && dist > 0.1)
+                        {
+                            Vector n = new Vector(dx, dy) / (int)dist;
+                            Vector vRelative = ball.Velocity - other.Velocity;
+                            double vDotN = vRelative.X * n.X + vRelative.Y * n.Y;
+
+                            if (vDotN >= 0) continue;
+
+                            double m1 = ball.Mass;
+                            double m2 = other.Mass;
+
+                            double impulse = (2 * vDotN) / (m1 + m2);
+
+                            ball.Velocity -= n * (int)(impulse * m2);
+                            other.Velocity += n * (int)(impulse * m1);
                         }
                     }
                 }
+
                 Thread.Sleep(16);
             }
         }
 
         public void StopAllThreads()
         {
-            stopThreads = true; 
+            stopThreads = true;
             foreach (var thread in threads)
             {
                 if (thread.IsAlive)
@@ -124,16 +137,18 @@ namespace Logic
                     thread.Join();
                 }
             }
-            threads.Clear(); 
-            stopThreads = false; 
+            threads.Clear();
+            stopThreads = false;
         }
+
         public Ball CreateBall()
         {
-            int x = Random.Shared.Next(0, width);
-            int y = Random.Shared.Next(0, height);
-            int radius = Random.Shared.Next(10, 50);
-            Ball newBall = new Ball(x, y, radius);
-            return newBall;
+            int x = random.Next(0, width);
+            int y = random.Next(0, height);
+            int radius = random.Next(10, 50);
+            Vector position = new Vector(x, y);
+            Vector velocity = new Vector(random.Next(-1, 2), random.Next(-1, 2));
+            return new Ball(position, velocity,  radius);
         }
     }
 }

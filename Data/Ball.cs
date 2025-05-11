@@ -4,39 +4,42 @@ namespace Data
 {
     public class Ball : INotifyPropertyChanged, IDataAPI
     {
-        private int x;
-        private int y;
-        private int diameter;
-        public int CanvasLeft => X - Diameter / 2;
-        public int CanvasTop => Y - Diameter / 2;
+        private Vector position;
+        private Vector velocity;
+        private double diameter;
+        public double CanvasLeft => position.X - Diameter / 2;
+        public double CanvasTop => position.Y - Diameter / 2;
 
-        public int X
+        public double Mass => Math.Pow(Diameter / 2.0, 2);
+
+        public Vector Position
         {
-            get => x;
+            get => position;
             set
             {
-                if (x != value)
+                if (position.X != value.X || position.Y != value.Y)
                 {
-                    x = value;
+                    position = value;
                     OnPropertyChanged(nameof(CanvasLeft));
-                }
-            }
-        }
-
-        public int Y
-        {
-            get => y;
-            set
-            {
-                if (y != value)
-                {
-                    y = value;
                     OnPropertyChanged(nameof(CanvasTop));
                 }
             }
         }
 
-        public int Diameter
+        public Vector Velocity
+        {
+            get => velocity;
+            set
+            {
+                if (velocity.X != value.X || velocity.Y != value.Y)
+                {
+                    velocity = value;
+                    OnPropertyChanged(nameof(Velocity));
+                }
+            }
+        }
+
+        public double Diameter
         {
             get => diameter;
             set
@@ -54,16 +57,12 @@ namespace Data
                 }
             }
         }
-        public int DeltaX { get; set; }
-        public int DeltaY { get; set; }
 
-        public Ball(int x, int y, int diameter)
+        public Ball(Vector position, Vector velocity, int diameter)
         {
-            X = x;
-            Y = y;
+            this.position = position;
+            this.velocity = velocity;
             Diameter = diameter;
-            DeltaX = 1;
-            DeltaY = 1; 
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

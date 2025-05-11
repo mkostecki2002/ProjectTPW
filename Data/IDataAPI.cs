@@ -4,13 +4,11 @@ namespace Data
 {
     public interface IDataAPI
     {
-        int X { get; set; }
-        int Y { get; set; }
-        int Diameter { get; set; }
-        int DeltaX { get; set; }
-        int DeltaY { get; set; }
-        int CanvasLeft { get; }
-        int CanvasTop { get; }
+        Vector Position { get; set; }
+        Vector Velocity { get; set; }
+        public double Diameter { get; set; }
+        double CanvasLeft { get; }
+        double CanvasTop { get; }
 
         event PropertyChangedEventHandler? PropertyChanged;
     }
