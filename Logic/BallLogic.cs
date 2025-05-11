@@ -1,16 +1,14 @@
-﻿using System.Collections.ObjectModel;
-using Data;
+﻿using Data;
 
 namespace Logic
 {
     public class BallLogic : ILogicAPI
     {
-        public ObservableCollection<Ball> Balls = new ObservableCollection<Ball>();
         private readonly List<Thread> threads = new List<Thread>();
         private readonly int width;
         private readonly int height;
         private readonly Random random = new Random();
-        private bool stopThreads = false; // Flag to stop threads
+        private bool stopThreads = false;
 
 
         public BallLogic(int width, int height)
@@ -75,56 +73,47 @@ namespace Logic
         {
             while (!stopThreads)
             {
-                int newX, newY, ballRadius;
-                List<Ball> ballsSnapshot;
+                int newX = ball.X + ball.DeltaX;
+                int newY = ball.Y + ball.DeltaY;
+                int ballRadius = ball.Diameter / 2;
 
-                lock (balls)
+                bool isWallCollisionX = newX - ballRadius < 0 || newX + ballRadius >= width;
+                bool isWallCollisionY = newY - ballRadius < 0 || newY + ballRadius >= height;
+
+                if (isWallCollisionX) ball.DeltaX *= -1;
+                if (isWallCollisionY) ball.DeltaY *= -1;
+
+                if (!isWallCollisionX && !isWallCollisionY)
                 {
-                    newX = ball.X + ball.DeltaX;
-                    newY = ball.Y + ball.DeltaY;
-                    ballRadius = ball.Diameter / 2;
-
-                    bool isWallCollisionX = newX - ballRadius < 0 || newX + ballRadius >= width;
-                    bool isWallCollisionY = newY - ballRadius < 0 || newY + ballRadius >= height;
-
-                    if (isWallCollisionX || isWallCollisionY)
-                    {
-                        if (isWallCollisionX)
-                            ball.DeltaX *= -1;
-                        if (isWallCollisionY)
-                            ball.DeltaY *= -1;
-                    }
-                    else
+                    lock(balls)
                     {
                         ball.X = newX;
                         ball.Y = newY;
                     }
-
-                    ballsSnapshot = balls.ToList();
                 }
 
-                foreach (var otherBall in ballsSnapshot)
+                foreach (var otherBall in balls)
                 {
                     if (otherBall == null || otherBall == ball)
                         continue;
 
-                    double distance = Math.Sqrt(Math.Pow(newX - otherBall.X, 2) + Math.Pow(newY - otherBall.Y, 2));
+                    double distance = Math.Sqrt(Math.Pow(ball.X - otherBall.X, 2) + Math.Pow(ball.Y - otherBall.Y, 2));
                     if (distance < ballRadius + (otherBall.Diameter / 2))
                     {
-                        ball.DeltaX *= -1;
-                        ball.DeltaY *= -1;
-
-                        lock (balls)
-                        {
+                        lock (balls) 
+                        { 
+                            ball.DeltaX *= -1;
+                            ball.DeltaY *= -1;
                             otherBall.DeltaX *= -1;
                             otherBall.DeltaY *= -1;
+                            break;
                         }
-                        break;
                     }
                 }
                 Thread.Sleep(16);
             }
         }
+
         public void StopAllThreads()
         {
             stopThreads = true; 
@@ -138,16 +127,13 @@ namespace Logic
             threads.Clear(); 
             stopThreads = false; 
         }
-        public void AddBall()
+        public Ball CreateBall()
         {
-            int x = Random.Shared.Next(0, 800);
-            int y = Random.Shared.Next(0, 600);
+            int x = Random.Shared.Next(0, width);
+            int y = Random.Shared.Next(0, height);
             int radius = Random.Shared.Next(10, 50);
             Ball newBall = new Ball(x, y, radius);
-            Balls.Add(newBall);
-            InitializeBall(newBall, Balls);
+            return newBall;
         }
-
-
     }
 }

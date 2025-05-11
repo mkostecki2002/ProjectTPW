@@ -1,29 +1,29 @@
 ﻿using Data;
 using Logic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 
 namespace Model
 {
-    public class BallModel
+    public class BallModel : IModelAPI
     {
-        public ObservableCollection<Ball> Balls;
-        private BallLogic ballLogic;
+        public ObservableCollection<Ball> Balls { get; set; } 
+        private ILogicAPI ballLogic;
 
-
-        public BallModel(int numOfBalls)
+        public BallModel(ILogicAPI ballLogic, int numOfBalls)
         {
-            ballLogic = new BallLogic(800, 600);
-            Balls = ballLogic.Balls;
+            this.ballLogic = ballLogic;
+            Balls = new ObservableCollection<Ball>();
             for (int i = 0; i < numOfBalls; i++)
             {
-                ballLogic.AddBall();
+                AddBall();
             }
         }
 
         public void AddBall()
         {
-            ballLogic.AddBall();
+            Ball newBall = ballLogic.CreateBall();
+            Balls.Add(newBall);
+            ballLogic.InitializeBall(newBall, Balls);
         }
 
         public void RemoveBall()

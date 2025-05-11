@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Logic;
 using Model;
 
 namespace ViewModel
@@ -41,7 +42,8 @@ namespace ViewModel
 
         public BallDisplay(int width, int height)
         {
-            ballModel = new BallModel(ballsCount);
+            BallLogic ballLogic = new BallLogic(width, height);
+            ballModel = new BallModel(ballLogic, ballsCount);
             Balls = ballModel.Balls;
             UpdateBallCountCommand = new RelayCommand(Execute, CanExecute);
         }
