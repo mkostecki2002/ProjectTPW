@@ -7,39 +7,36 @@ namespace DataTests
         [Fact]
         public void Constructor_ShouldInitializeProperties()
         {
-            Ball ball = new Ball(10, 20, 30);
+            var position = new Vector(10, 20);
+            var velocity = new Vector(1, 1);
+            Ball ball = new Ball(position, velocity, 30);
 
-            Assert.Equal(10, ball.X);
-            Assert.Equal(20, ball.Y);
+            Assert.Equal(10, ball.Position.X);
+            Assert.Equal(20, ball.Position.Y);
+            Assert.Equal(1, ball.Velocity.X);
+            Assert.Equal(1, ball.Velocity.Y);
             Assert.Equal(30, ball.Diameter);
-            Assert.Equal(1, ball.DeltaX);
-            Assert.Equal(1, ball.DeltaY);
         }
 
         [Fact]
-        public void X_Setter()
+        public void Position_Setter()
         {
-            Ball ball = new Ball(10, 20, 30);
+            var position = new Vector(10, 20);
+            var velocity = new Vector(1, 1);
+            Ball ball = new Ball(position, velocity, 30);
 
-            ball.X = 50;
+            ball.Position = new Vector(50, 60);
 
-            Assert.Equal(50, ball.X);
+            Assert.Equal(50, ball.Position.X);
+            Assert.Equal(60, ball.Position.Y);
         }
 
         [Fact]
-        public void Y_Setter()
+        public void Diameter_Setter()
         {
-            Ball ball = new Ball(10, 20, 30);
-
-            ball.Y = 60;
-
-            Assert.Equal(60, ball.Y);
-        }
-
-        [Fact]
-        public void Diameter_Setter_ShouldUpdateValueAndTriggerPropertyChanged()
-        {
-            Ball ball = new Ball(10, 20, 30);
+            var position = new Vector(10, 20);
+            var velocity = new Vector(1, 1);
+            Ball ball = new Ball(position, velocity, 30);
             bool propertyChangedTriggered = false;
 
             ball.PropertyChanged += (sender, args) =>
@@ -57,29 +54,35 @@ namespace DataTests
         }
 
         [Fact]
-        public void CanvasLeft_ShouldReturnCorrectValue()
+        public void CanvasLeft()
         {
-            Ball ball = new Ball(50, 50, 20);
+            var position = new Vector(50, 50);
+            var velocity = new Vector(0, 0);
+            Ball ball = new Ball(position, velocity, 20);
 
-            int canvasLeft = ball.CanvasLeft;
+            double canvasLeft = ball.CanvasLeft;
 
-            Assert.Equal(40, canvasLeft); // X - Diameter / 2
+            Assert.Equal(40, canvasLeft);
         }
 
         [Fact]
-        public void CanvasTop_ShouldReturnCorrectValue()
+        public void CanvasTop()
         {
-            Ball ball = new Ball(50, 50, 20);
+            var position = new Vector(50, 50);
+            var velocity = new Vector(0, 0);
+            Ball ball = new Ball(position, velocity, 20);
 
-            int canvasTop = ball.CanvasTop;
+            double canvasTop = ball.CanvasTop;
 
-            Assert.Equal(40, canvasTop); // Y - Diameter / 2
+            Assert.Equal(40, canvasTop);
         }
 
         [Fact]
-        public void PropertyChanged_ShouldTriggerForCanvasLeftAndCanvasTop()
+        public void PropertyChanged()
         {
-            Ball ball = new Ball(50, 50, 20);
+            var position = new Vector(50, 50);
+            var velocity = new Vector(0, 0);
+            Ball ball = new Ball(position, velocity, 20);
             bool canvasLeftChanged = false;
             bool canvasTopChanged = false;
 
@@ -95,8 +98,7 @@ namespace DataTests
                 }
             };
 
-            ball.X = 60;
-            ball.Y = 70;
+            ball.Position = new Vector(60, 70);
 
             Assert.True(canvasLeftChanged);
             Assert.True(canvasTopChanged);

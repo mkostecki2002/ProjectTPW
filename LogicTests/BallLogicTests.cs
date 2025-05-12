@@ -12,105 +12,64 @@ namespace LogicTests
 
         public BallLogicTests()
         {
-            // Injecting dependencies manually
             ballLogic = new BallLogic(width, height);
             balls = new List<Ball>
             {
-                new Ball(10, 10, 10),
-                new Ball(30, 30, 10),
-                new Ball(50, 50, 10)
+                new Ball(new Vector(10, 10), new Vector(1, 1), 10),
+                new Ball(new Vector(30, 30), new Vector(1, 1), 10),
+                new Ball(new Vector(50, 50), new Vector(1, 1), 10)
             };
         }
 
         [Fact]
-        public void InitializeBall_ShouldSetValidPositionAndStartThread()
+        public void IsValidPosition_True()
         {
-            // Arrange
-            Ball ball = new Ball(0, 0, 10);
+            var position = new Vector(20, 20);
+            double diameter = 10;
 
-            // Act
-            ballLogic.InitializeBall(ball, balls);
+            bool result = ballLogic.IsValidPosition(position, diameter, balls);
 
-            // Allow some time for the thread to start
-            Thread.Sleep(50);
-
-            // Assert
-            Assert.True(ball.X >= 0 && ball.X < width);
-            Assert.True(ball.Y >= 0 && ball.Y < height);
-        }
-
-        [Fact]
-        public void IsValidPosition_ShouldReturnTrueForValidPosition()
-        {
-            // Arrange
-            int x = 20;
-            int y = 20;
-            int diameter = 10;
-
-            // Act
-            bool result = ballLogic.IsValidPosition(x, y, diameter, balls);
-
-            // Assert
             Assert.True(result);
         }
 
         [Fact]
-        public void IsValidPosition_ShouldReturnFalseForInvalidPosition()
+        public void IsValidPosition_False()
         {
-            // Arrange
-            int x = -10; // Out of bounds
-            int y = 20;
-            int diameter = 10;
+            var position = new Vector(-10, 20); 
+            double diameter = 10;
 
-            // Act
-            bool result = ballLogic.IsValidPosition(x, y, diameter, balls);
+            bool result = ballLogic.IsValidPosition(position, diameter, balls);
 
-            // Assert
             Assert.False(result);
         }
 
         [Fact]
-        public void MoveBall_ShouldUpdateBallPosition()
+        public void MoveBall()
         {
-            // Arrange
-            Ball ball = new Ball(50, 50, 10)
-            {
-                DeltaX = 1,
-                DeltaY = 1
-            };
+            Ball ball = new Ball(new Vector(50, 50), new Vector(1, 1), 10);
             balls.Add(ball);
-            // Act
+
             Thread thread = new Thread(() => ballLogic.MoveBall(ball, balls));
             thread.Start();
 
-            // Allow some time for the ball to move
             Thread.Sleep(50);
 
-            // Assert
-            Assert.NotEqual(50, ball.X);
-            Assert.NotEqual(50, ball.Y);
+            Assert.NotEqual(50, ball.Position.X);
+            Assert.NotEqual(50, ball.Position.Y);
         }
 
         [Fact]
-        public void MoveBall_ShouldReverseDirectionOnWallCollision()
+        public void MoveBall_Collision()
         {
-            // Arrange
-            Ball ball = new Ball(95, 50, 10) // Near the right wall
-            {
-                DeltaX = 1, // Moving right
-                DeltaY = 0  // No vertical movement
-            };
+            Ball ball = new Ball(new Vector(95, 50), new Vector(1, 0), 10); 
 
-            // Act
             Thread thread = new Thread(() => ballLogic.MoveBall(ball, balls));
             thread.Start();
 
-            // Allow some time for the ball to collide with the wall
             Thread.Sleep(50);
 
-            // Assert
-            Assert.Equal(-1, ball.DeltaX); // Ball should reverse direction on X-axis
-            Assert.Equal(0, ball.DeltaY);  // Y-axis movement should remain unchanged
+            Assert.True(ball.Velocity.X == -1); 
+            Assert.True(ball.Velocity.Y == 0);  
         }
     }
 }

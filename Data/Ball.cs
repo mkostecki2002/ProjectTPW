@@ -4,56 +4,74 @@ namespace Data
 {
     public class Ball : INotifyPropertyChanged, IDataAPI
     {
+        private readonly object _lock = new();
         private Vector position;
         private Vector velocity;
         private double diameter;
-        public double CanvasLeft => position.X - Diameter / 2;
-        public double CanvasTop => position.Y - Diameter / 2;
 
-        public double Mass => Math.Pow(Diameter / 2.0, 2);
+        public double CanvasLeft
+        {
+            get { lock (_lock) { return position.X - Diameter / 2; } }
+        }
+        public double CanvasTop
+        {
+            get { lock (_lock) { return position.Y - Diameter / 2; } }
+        }
+
+        public double Mass
+        {
+            get { lock (_lock) { return Math.Pow(Diameter / 2.0, 2); } }
+        }
 
         public Vector Position
         {
-            get => position;
+            get { lock (_lock) { return position; } }
             set
             {
-                if (position.X != value.X || position.Y != value.Y)
+                lock (_lock)
                 {
-                    position = value;
-                    OnPropertyChanged(nameof(CanvasLeft));
-                    OnPropertyChanged(nameof(CanvasTop));
+                    if (position.X != value.X || position.Y != value.Y)
+                    {
+                        position = value;
+                        OnPropertyChanged(nameof(CanvasLeft));
+                        OnPropertyChanged(nameof(CanvasTop));
+                    }
                 }
             }
         }
 
         public Vector Velocity
         {
-            get => velocity;
+            get { lock (_lock) { return velocity; } }
             set
             {
-                if (velocity.X != value.X || velocity.Y != value.Y)
+                lock (_lock)
                 {
-                    velocity = value;
-                    OnPropertyChanged(nameof(Velocity));
+                    if (velocity.X != value.X || velocity.Y != value.Y)
+                    {
+                        velocity = value;
+                        OnPropertyChanged(nameof(Velocity));
+                    }
                 }
             }
         }
 
         public double Diameter
         {
-            get => diameter;
+            get { lock (_lock) { return diameter; } }
             set
             {
-                if (value <= 0)
+                lock (_lock)
                 {
-                    throw new ArgumentException("Diameter must be a positive value.");
-                }
-                if (diameter != value)
-                {
-                    diameter = value;
-                    OnPropertyChanged(nameof(Diameter));
-                    OnPropertyChanged(nameof(CanvasLeft)); 
-                    OnPropertyChanged(nameof(CanvasTop));
+                    if (value <= 0)
+                        throw new ArgumentException("Diameter must be a positive value.");
+                    if (diameter != value)
+                    {
+                        diameter = value;
+                        OnPropertyChanged(nameof(Diameter));
+                        OnPropertyChanged(nameof(CanvasLeft));
+                        OnPropertyChanged(nameof(CanvasTop));
+                    }
                 }
             }
         }
@@ -71,6 +89,5 @@ namespace Data
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 }
