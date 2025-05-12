@@ -21,13 +21,12 @@ namespace ViewModel
             return parameter is string text && !string.IsNullOrWhiteSpace(text);
         }
 
-        public void Execute(object? parameter) 
+        public async Task Execute(object? parameter) 
         {
             if (parameter is string text && int.TryParse(text, out int newCount))
             {
                 if (newCount > 0)
                 {
-
                     ballModel.Balls.Clear();
                     ballModel.StopAllThreads();
                     ballsCount = newCount;
@@ -45,15 +44,16 @@ namespace ViewModel
             BallLogic ballLogic = new BallLogic(width, height);
             ballModel = new BallModel(ballLogic, ballsCount);
             Balls = ballModel.Balls;
-            UpdateBallCountCommand = new RelayCommand(Execute, CanExecute);
+            UpdateBallCountCommand = new AsyncRelayCommand(Execute, CanExecute);
         }
     }
 
-    internal class RelayCommand : ICommand
+    internal class AsyncRelayCommand : ICommand
     {
-        private readonly Action<object?> execute;
+        private readonly Func<object?, Task> execute;
         private readonly Predicate<object?> canExecute;
-        public RelayCommand(Action<object?> execute, Predicate<object?> canExecute)
+        private bool isExecuting;
+        public AsyncRelayCommand(Func<object?, Task> execute, Predicate<object?> canExecute)
         {
             this.execute = execute;
             this.canExecute = canExecute;
@@ -62,9 +62,9 @@ namespace ViewModel
         {
             return canExecute(parameter);
         }
-        public void Execute(object? parameter)
+        public async void Execute(object? parameter)
         {
-            execute(parameter);
+            await execute(parameter);
         }
         public event EventHandler? CanExecuteChanged
         {
