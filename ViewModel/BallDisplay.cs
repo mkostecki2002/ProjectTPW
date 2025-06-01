@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Logic;
 using Model;
+using Logger;
 
 namespace ViewModel
 {
@@ -41,7 +42,8 @@ namespace ViewModel
 
         public BallDisplay(int width, int height)
         {
-            BallLogic ballLogic = new BallLogic(width, height);
+            BallLogger ballLogger = new BallLogger(@"..\..\..\..\log.txt");
+            BallLogic ballLogic = new BallLogic(width, height, ballLogger);
             ballModel = new BallModel(ballLogic, ballsCount);
             Balls = ballModel.Balls;
             UpdateBallCountCommand = new AsyncRelayCommand(Execute, CanExecute);

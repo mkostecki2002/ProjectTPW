@@ -1,4 +1,7 @@
 ﻿using Data;
+using Common;
+using Logger;
+using System.Diagnostics;
 
 namespace Logic
 {
@@ -9,11 +12,13 @@ namespace Logic
         private readonly int height;
         private readonly Random random = new();
         private bool stopThreads = false;
+        private readonly BallLogger ballLogger;
 
-        public BallLogic(int width, int height)
+        public BallLogic(int width, int height, BallLogger ballLogger)
         {
             this.width = width;
             this.height = height;
+            this.ballLogger = ballLogger;
         }
 
         public void InitializeBall(Ball ball, IEnumerable<Ball> balls)
@@ -42,6 +47,7 @@ namespace Logic
             ball.Velocity = velocity;
 
             Thread thread = new Thread(() => MoveBall(ball, balls));
+
             threads.Add(thread);
             thread.Start();
         }
@@ -78,8 +84,13 @@ namespace Logic
 
         public void MoveBall(Ball ball, IEnumerable<Ball> balls)
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            const int intervalMs = 16;
+
             while (!stopThreads)
             {
+                long startMs = sw.ElapsedMilliseconds;
+
                 double ballRadius = ball.Diameter / 2;
 
                 Vector newPos = ball.Position + ball.Velocity;
@@ -123,7 +134,22 @@ namespace Logic
                     }
                 }
 
-                Thread.Sleep(16);
+                long endMs = sw.ElapsedMilliseconds;
+                int workTime = (int)(endMs - startMs);
+
+
+                int sleepTime = intervalMs - workTime;
+
+
+                if (sleepTime > 0)
+                {
+                    Thread.Sleep(sleepTime);
+                }
+                else
+                { 
+                    ballLogger.Log("Time exceeded!");
+                }
+                ballLogger.Log(ball);
             }
         }
 

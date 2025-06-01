@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Data
+namespace Common
 {
     public interface IDataAPI
     {

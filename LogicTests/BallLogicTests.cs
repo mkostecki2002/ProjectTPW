@@ -1,5 +1,6 @@
 using Logic;
 using Data;
+using Common;
 
 namespace LogicTests
 {
