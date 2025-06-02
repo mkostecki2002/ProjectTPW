@@ -24,7 +24,7 @@ namespace Model
             {
                 AddBall();
             }
-            _timer = new Timer(_ => ballLogic.CheckBalls(Balls), null, 0, 1);
+            _timer = new Timer(_ => ballLogic.CheckBalls(Balls), null, 0, 16);
         }
 
         public void AddBall()
