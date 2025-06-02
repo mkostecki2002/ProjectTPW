@@ -12,7 +12,6 @@ namespace Model
     {
         public ObservableCollection<Ball> Balls { get; set; }
         void AddBall();
-        void RemoveBall();
         void StopAllThreads();
     }
 }

@@ -22,7 +22,7 @@ namespace ViewModel
             return parameter is string text && !string.IsNullOrWhiteSpace(text);
         }
 
-        public async Task Execute(object? parameter) 
+        public async Task Execute(object? parameter)
         {
             if (parameter is string text && int.TryParse(text, out int newCount))
             {
@@ -36,15 +36,15 @@ namespace ViewModel
                         ballModel.AddBall();
                     }
                 }
-                
+
             }
         }
 
         public BallDisplay(int width, int height)
         {
-            BallLogger ballLogger = new BallLogger(@"..\..\..\..\log.txt");
-            BallLogic ballLogic = new BallLogic(width, height, ballLogger);
-            ballModel = new BallModel(ballLogic, ballsCount);
+            ILogger ballLogger = new BallLogger(@"..\..\..\..\log.txt");
+            BallLogic ballLogic = new BallLogic(width, height);
+            ballModel = new BallModel(ballLogic, ballsCount, ballLogger);
             Balls = ballModel.Balls;
             UpdateBallCountCommand = new AsyncRelayCommand(Execute, CanExecute);
         }

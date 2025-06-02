@@ -1,14 +1,66 @@
 ﻿using System.ComponentModel;
+using Logger;
 using Common;
+using System.Diagnostics;
 
 namespace Data
 {
     public class Ball : INotifyPropertyChanged, IDataAPI
     {
+
         private readonly object _lock = new();
         private Vector position;
         private Vector velocity;
         private double diameter;
+        private Thread _worker;
+        private readonly ILogger _logger;
+        private volatile bool _running = true;
+
+        public Ball(Vector position, Vector velocity, int diameter, ILogger logger)
+        {
+            this.position = position;
+            this.velocity = velocity;
+            Diameter = diameter;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _worker = new Thread(Run) { IsBackground = true };
+        }
+
+        public void StartWorker()
+        {
+            _worker.Start();
+        }
+
+        private void Run()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            const int intervalMs = 16;
+            while (_running)
+            {
+                long startMs = sw.ElapsedMilliseconds;
+                lock (_lock)
+                {
+                    Position += Velocity;
+                }
+                long endMs = sw.ElapsedMilliseconds;
+                int workTime = (int)(endMs - startMs);
+
+
+                int sleepTime = intervalMs - workTime;
+
+
+                if (sleepTime > 0)
+                {
+                    _logger.Log(this);
+                    Thread.Sleep(sleepTime);
+                }
+                else
+                {
+                    _logger.Log($"Ball {this} took too long to process: {workTime}ms, expected: {intervalMs}ms");
+                }
+            }
+        }
+
+        public void Stop() => _running = false;
 
         public double CanvasLeft
         {
@@ -44,7 +96,7 @@ namespace Data
         public Vector Velocity
         {
             get { lock (_lock) { return velocity; } }
-            set
+            private set
             {
                 lock (_lock)
                 {
@@ -77,11 +129,10 @@ namespace Data
             }
         }
 
-        public Ball(Vector position, Vector velocity, int diameter)
+
+        public void RequestBounce(Vector newVelocity)
         {
-            this.position = position;
-            this.velocity = velocity;
-            Diameter = diameter;
+            Velocity = newVelocity;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -89,6 +140,7 @@ namespace Data
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         }
     }
 }

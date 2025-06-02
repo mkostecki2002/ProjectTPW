@@ -1,15 +1,20 @@
 using Data;
+using Common;
+using Logger;
 
 namespace DataTests
 {
-    public class BallTests
+    public class BallTests : IDisposable
     {
+        private readonly string _logFilePath = "logtest.txt";
+        private readonly BallLogger _logger = new BallLogger("logtest.txt");
+
         [Fact]
         public void Constructor_ShouldInitializeProperties()
         {
             var position = new Vector(10, 20);
             var velocity = new Vector(1, 1);
-            Ball ball = new Ball(position, velocity, 30);
+            Ball ball = new Ball(position, velocity, 30, _logger);
 
             Assert.Equal(10, ball.Position.X);
             Assert.Equal(20, ball.Position.Y);
@@ -23,7 +28,7 @@ namespace DataTests
         {
             var position = new Vector(10, 20);
             var velocity = new Vector(1, 1);
-            Ball ball = new Ball(position, velocity, 30);
+            Ball ball = new Ball(position, velocity, 30, _logger);
 
             ball.Position = new Vector(50, 60);
 
@@ -36,7 +41,7 @@ namespace DataTests
         {
             var position = new Vector(10, 20);
             var velocity = new Vector(1, 1);
-            Ball ball = new Ball(position, velocity, 30);
+            Ball ball = new Ball(position, velocity, 30, _logger);
             bool propertyChangedTriggered = false;
 
             ball.PropertyChanged += (sender, args) =>
@@ -58,7 +63,7 @@ namespace DataTests
         {
             var position = new Vector(50, 50);
             var velocity = new Vector(0, 0);
-            Ball ball = new Ball(position, velocity, 20);
+            Ball ball = new Ball(position, velocity, 20, _logger);
 
             double canvasLeft = ball.CanvasLeft;
 
@@ -70,7 +75,7 @@ namespace DataTests
         {
             var position = new Vector(50, 50);
             var velocity = new Vector(0, 0);
-            Ball ball = new Ball(position, velocity, 20);
+            Ball ball = new Ball(position, velocity, 20, _logger);
 
             double canvasTop = ball.CanvasTop;
 
@@ -82,7 +87,7 @@ namespace DataTests
         {
             var position = new Vector(50, 50);
             var velocity = new Vector(0, 0);
-            Ball ball = new Ball(position, velocity, 20);
+            Ball ball = new Ball(position, velocity, 20, _logger);
             bool canvasLeftChanged = false;
             bool canvasTopChanged = false;
 
@@ -102,6 +107,15 @@ namespace DataTests
 
             Assert.True(canvasLeftChanged);
             Assert.True(canvasTopChanged);
+        }
+
+        public void Dispose()
+        {
+            _logger.Dispose();
+            if (File.Exists(_logFilePath))
+            {
+                File.Delete(_logFilePath);
+            }
         }
     }
 }

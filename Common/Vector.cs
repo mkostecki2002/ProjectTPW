@@ -13,7 +13,7 @@
 
         public static Vector operator +(Vector a, Vector b) => new(a.X + b.X, a.Y + b.Y);
         public static Vector operator -(Vector a, Vector b) => new(a.X - b.X, a.Y - b.Y);
-        public static Vector operator *(Vector a, int s) => new(a.X * s, a.Y * s);
-        public static Vector operator /(Vector a, int s) => new(a.X / s, a.Y / s);
+        public static Vector operator *(Vector a, double s) => new(a.X * s, a.Y * s);
+        public static Vector operator /(Vector a, double s) => new(a.X / s, a.Y / s);
     }
 }

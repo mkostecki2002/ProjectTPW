@@ -2,9 +2,10 @@
 
 namespace Logger
 {
-    interface ILogger
+    public interface ILogger
     {
         void Log(IDataAPI ball);
+        void Log(string message);
         void Dispose();
 
     }

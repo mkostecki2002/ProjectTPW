@@ -1,31 +1,31 @@
 using Logic;
 using Data;
 using Common;
+using Logger;
 
 namespace LogicTests
 {
-    public class BallLogicTests
+    public class BallLogicTests : IDisposable
     {
         private readonly BallLogic ballLogic;
         private readonly int width = 100;
         private readonly int height = 100;
-        private readonly List<Ball> balls;
+        private readonly string _logFilePath = "logtest.txt";
+        private readonly BallLogger _logger = new BallLogger("logtest.txt");
 
         public BallLogicTests()
         {
             ballLogic = new BallLogic(width, height);
-            balls = new List<Ball>
-            {
-                new Ball(new Vector(10, 10), new Vector(1, 1), 10),
-                new Ball(new Vector(30, 30), new Vector(1, 1), 10),
-                new Ball(new Vector(50, 50), new Vector(1, 1), 10)
-            };
         }
 
         [Fact]
         public void IsValidPosition_True()
         {
-            var position = new Vector(20, 20);
+            var balls = new List<Ball>
+            {
+                new Ball(new Vector(10, 10), new Vector(1, 1), 10, _logger)
+            };
+            var position = new Vector(30, 30);
             double diameter = 10;
 
             bool result = ballLogic.IsValidPosition(position, diameter, balls);
@@ -36,7 +36,11 @@ namespace LogicTests
         [Fact]
         public void IsValidPosition_False()
         {
-            var position = new Vector(-10, 20); 
+            var balls = new List<Ball>
+            {
+                new Ball(new Vector(10, 10), new Vector(1, 1), 10, _logger)
+            };
+            var position = new Vector(10, 10); // nak³ada siê na istniej¹c¹ kulê
             double diameter = 10;
 
             bool result = ballLogic.IsValidPosition(position, diameter, balls);
@@ -45,32 +49,45 @@ namespace LogicTests
         }
 
         [Fact]
-        public void MoveBall()
+        public void MoveBall_BouncesOnWall()
         {
-            Ball ball = new Ball(new Vector(50, 50), new Vector(1, 1), 10);
-            balls.Add(ball);
+            var balls = new List<Ball>
+            {
+                new Ball(new Vector(95, 50), new Vector(10, 0), 10, _logger)
+            };
 
-            Thread thread = new Thread(() => ballLogic.MoveBall(ball, balls));
-            thread.Start();
+            ballLogic.CheckBalls(balls);
 
-            Thread.Sleep(50);
-
-            Assert.NotEqual(50, ball.Position.X);
-            Assert.NotEqual(50, ball.Position.Y);
+            Assert.Equal(-10, balls[0].Velocity.X, 1);
+            Assert.Equal(0, balls[0].Velocity.Y, 1);
         }
 
         [Fact]
-        public void MoveBall_Collision()
+        public void CheckBalls_TwoBalls_CollideAndChangeVelocity()
         {
-            Ball ball = new Ball(new Vector(95, 50), new Vector(1, 0), 10); 
+            var ballA = new Ball(new Vector(50, 50), new Vector(1, 0), 10, _logger);
+            var ballB = new Ball(new Vector(60, 50), new Vector(-1, 0), 10, _logger);
+            var balls = new List<Ball> { ballA, ballB };
 
-            Thread thread = new Thread(() => ballLogic.MoveBall(ball, balls));
-            thread.Start();
+            ballA.StartWorker();
+            ballB.StartWorker();
+            ballLogic.CheckBalls(balls);
 
-            Thread.Sleep(50);
+            Assert.Equal(-1, ballA.Velocity.X, 1);
+            Assert.Equal(1, ballB.Velocity.X, 1);
+            Assert.Equal(0, ballA.Velocity.Y, 1);
+            Assert.Equal(0, ballB.Velocity.Y, 1);
 
-            Assert.True(ball.Velocity.X == -1); 
-            Assert.True(ball.Velocity.Y == 0);  
+        }
+
+
+        public void Dispose()
+        {
+            _logger.Dispose();
+            if (File.Exists(_logFilePath))
+            {
+                File.Delete(_logFilePath);
+            }
         }
     }
 }

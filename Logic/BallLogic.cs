@@ -1,24 +1,18 @@
 ﻿using Data;
 using Common;
-using Logger;
-using System.Diagnostics;
 
 namespace Logic
 {
     public class BallLogic : ILogicAPI
     {
-        private readonly List<Thread> threads = new();
         private readonly int width;
         private readonly int height;
         private readonly Random random = new();
-        private bool stopThreads = false;
-        private readonly BallLogger ballLogger;
 
-        public BallLogic(int width, int height, BallLogger ballLogger)
+        public BallLogic(int width, int height)
         {
             this.width = width;
             this.height = height;
-            this.ballLogger = ballLogger;
         }
 
         public void InitializeBall(Ball ball, IEnumerable<Ball> balls)
@@ -44,12 +38,7 @@ namespace Logic
                 velocity = new Vector(1, 1);
             }
 
-            ball.Velocity = velocity;
-
-            Thread thread = new Thread(() => MoveBall(ball, balls));
-
-            threads.Add(thread);
-            thread.Start();
+            ball.RequestBounce(velocity);
         }
 
         public bool IsValidPosition(Vector position, double diameter, IEnumerable<Ball> balls)
@@ -82,99 +71,82 @@ namespace Logic
             return true;
         }
 
-        public void MoveBall(Ball ball, IEnumerable<Ball> balls)
+        public void CheckBalls(IEnumerable<Ball> balls)
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            const int intervalMs = 16;
-
-            while (!stopThreads)
+            balls = balls.ToList();
+            foreach (var ballA in balls)
             {
-                long startMs = sw.ElapsedMilliseconds;
-
-                double ballRadius = ball.Diameter / 2;
-
-                Vector newPos = ball.Position + ball.Velocity;
-
-                if (newPos.X - ballRadius < 0 || newPos.X + ballRadius >= width)
-                    ball.Velocity = new Vector(-ball.Velocity.X, ball.Velocity.Y);
-
-                if (newPos.Y - ballRadius < 0 || newPos.Y + ballRadius >= height)
-                    ball.Velocity = new Vector(ball.Velocity.X, -ball.Velocity.Y);
-
-                lock (balls)
+                foreach (var ballB in balls)
                 {
-                    ball.Position += ball.Velocity;
+                    Vector newPos = ballB.Position + ballB.Velocity;
+                    double ballRadius = ballB.Diameter / 2.0;
 
-                    foreach (var other in balls)
-                    {
-                        if (other == null || other == ball) continue;
+                    if (newPos.X - ballRadius < 0 || newPos.X + ballRadius >= width)
+                        ballB.RequestBounce(new Vector(-ballB.Velocity.X, ballB.Velocity.Y));
 
-                        double dx = ball.Position.X - other.Position.X;
-                        double dy = ball.Position.Y - other.Position.Y;
-                        double dist = Math.Sqrt(dx * dx + dy * dy);
+                    if (newPos.Y - ballRadius < 0 || newPos.Y + ballRadius >= height)
+                        ballB.RequestBounce(new Vector(ballB.Velocity.X, -ballB.Velocity.Y));
 
-                        double sumRadius = ball.Diameter / 2.0 + other.Diameter / 2.0;
-
-                        if (dist < sumRadius && dist > 0.1)
-                        {
-                            Vector n = new Vector(dx, dy) / (int)dist;
-                            Vector vRelative = ball.Velocity - other.Velocity;
-                            double vDotN = vRelative.X * n.X + vRelative.Y * n.Y;
-
-                            if (vDotN >= 0) continue;
-
-                            double m1 = ball.Mass;
-                            double m2 = other.Mass;
-
-                            double impulse = (2 * vDotN) / (m1 + m2);
-
-                            ball.Velocity -= n * (int)(impulse * m2);
-                            other.Velocity += n * (int)(impulse * m1);
-                        }
-                    }
+                    if (ballA == null || ballB == null || ballA == ballB) continue;
+                    if (IsColliding(ballA, ballB))
+                        handleCollision(ballA, ballB);
                 }
-
-                long endMs = sw.ElapsedMilliseconds;
-                int workTime = (int)(endMs - startMs);
-
-
-                int sleepTime = intervalMs - workTime;
-
-
-                if (sleepTime > 0)
-                {
-                    Thread.Sleep(sleepTime);
-                }
-                else
-                { 
-                    ballLogger.Log("Time exceeded!");
-                }
-                ballLogger.Log(ball);
             }
         }
 
-        public void StopAllThreads()
+
+        private void handleCollision(Ball ballA, Ball ballB)
         {
-            stopThreads = true;
-            foreach (var thread in threads)
+            var (dx, dy, dist) = calculateDistance(ballA.Position, ballB.Position);
+
+            if (dist == 0) return;
+
+            double overlap = ((ballA.Diameter / 2.0) + (ballB.Diameter / 2.0)) - dist;
+            Vector n = new Vector(dx, dy) / dist;
+            if (overlap > 0)
             {
-                if (thread.IsAlive)
-                {
-                    thread.Join();
-                }
+                ballA.Position += n * (overlap / 2.0);
+                ballB.Position -= n * (overlap / 2.0);
             }
-            threads.Clear();
-            stopThreads = false;
+
+            Vector vRelative = ballA.Velocity - ballB.Velocity;
+            double vDotN = vRelative.X * n.X + vRelative.Y * n.Y;
+
+            if (vDotN >= 0) return;
+
+            double m1 = ballA.Mass;
+            double m2 = ballB.Mass;
+
+            double impulse = (2 * vDotN) / (m1 + m2);
+
+            Vector velA = ballA.Velocity - n * (int)(impulse * m2);
+            Vector velB = ballB.Velocity + n * (int)(impulse * m1);
+
+            ballA.RequestBounce(velA);
+            ballB.RequestBounce(velB);
+
         }
 
-        public Ball CreateBall()
+        private (double, double, double) calculateDistance(Vector posA, Vector posB)
         {
-            int x = random.Next(0, width);
-            int y = random.Next(0, height);
-            int radius = random.Next(10, 50);
-            Vector position = new Vector(x, y);
-            Vector velocity = new Vector(random.Next(-1, 2), random.Next(-1, 2));
-            return new Ball(position, velocity,  radius);
+            double dx = posA.X - posB.X;
+            double dy = posA.Y - posB.Y;
+            double distance = Math.Sqrt(dx * dx + dy * dy);
+            return (dx, dy, distance);
+        }
+
+        private bool IsColliding(Ball ballA, Ball ballB)
+        {
+            var dist = calculateDistance(ballA.Position, ballB.Position);
+            double distance = dist.Item3;
+            double sumRadius = (ballA.Diameter / 2.0) + (ballB.Diameter / 2.0);
+            return distance < sumRadius;
+        }
+
+
+        public (int, int) GetFieldBoundaries()
+        {
+            return (width, height);
         }
     }
 }
