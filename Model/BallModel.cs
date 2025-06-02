@@ -42,14 +42,6 @@ namespace Model
             newBall.StartWorker();
         }
 
-        public void RemoveBall()
-        {
-            if (Balls.Count > 0)
-            {
-                Ball ballToRemove = Balls.Last();
-                Balls.Remove(ballToRemove);
-            }
-        }
         public void StopAllThreads()
         {
             for (int i = 0; i < Balls.Count; i++)

@@ -40,7 +40,7 @@ namespace LogicTests
             {
                 new Ball(new Vector(10, 10), new Vector(1, 1), 10, _logger)
             };
-            var position = new Vector(10, 10); // nak³ada siê na istniej¹c¹ kulê
+            var position = new Vector(10, 10);
             double diameter = 10;
 
             bool result = ballLogic.IsValidPosition(position, diameter, balls);

@@ -45,13 +45,12 @@ namespace Logger
                         }
                         catch (IOException)
                         {
-                            // Brak przepustowoœci – od³ó¿ wpis z powrotem do kolejki
                             _logQueue.Add(entry);
-                            Thread.Sleep(100); // Poczekaj chwilê przed kolejn¹ prób¹
+                            Thread.Sleep(100);
                         }
                     }
                 }
-                catch { /* obs³uga zamykania */ }
+                catch {  }
             }
         }
 

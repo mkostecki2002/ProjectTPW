@@ -7,6 +7,5 @@ namespace Logger
         void Log(IDataAPI ball);
         void Log(string message);
         void Dispose();
-
     }
 }
