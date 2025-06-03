@@ -13,7 +13,8 @@ namespace Model
         private ILogicAPI ballLogic;
         private Random random = new Random();
         private ILogger logger;
-        private readonly Timer _timer;
+        private readonly Timer _timerBalls;
+        private readonly Timer _timerCollisions;
 
         public BallModel(ILogicAPI ballLogic, int numOfBalls, ILogger logger)
         {
@@ -24,7 +25,8 @@ namespace Model
             {
                 AddBall();
             }
-            _timer = new Timer(_ => ballLogic.CheckBalls(Balls), null, 0, 16);
+
+            _timerCollisions = new Timer(_ => ballLogic.CheckBalls(Balls), null, 0, 16);
         }
 
         public void AddBall()
@@ -39,7 +41,7 @@ namespace Model
             Ball newBall = new Ball(position, velocity, radius, logger);
             Balls.Add(newBall);
             ballLogic.InitializeBall(newBall, Balls);
-            newBall.StartWorker();
+            newBall.Start();
         }
 
         public void StopAllThreads()

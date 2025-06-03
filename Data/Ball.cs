@@ -15,6 +15,7 @@ namespace Data
         private Thread _worker;
         private readonly ILogger _logger;
         private volatile bool _running = true;
+        private Timer _timer;
 
         public Ball(Vector position, Vector velocity, int diameter, ILogger logger)
         {
@@ -22,42 +23,20 @@ namespace Data
             this.velocity = velocity;
             Diameter = diameter;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _worker = new Thread(Run) { IsBackground = true };
         }
 
-        public void StartWorker()
+        public void Start()
         {
-            _worker.Start();
+            _timer = new Timer(_ => Run(), null, 0, 16);
         }
 
         private void Run()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            const int intervalMs = 16;
-            while (_running)
+            lock (_lock)
             {
-                long startMs = sw.ElapsedMilliseconds;
-                lock (_lock)
-                {
-                    Position += Velocity;
-                }
-                long endMs = sw.ElapsedMilliseconds;
-                int workTime = (int)(endMs - startMs);
-
-
-                int sleepTime = intervalMs - workTime;
-
-
-                if (sleepTime > 0)
-                {
-                    _logger.Log(this);
-                    Thread.Sleep(sleepTime);
-                }
-                else
-                {
-                    _logger.Log($"Ball {this} took too long to process: {workTime}ms, expected: {intervalMs}ms");
-                }
+                Position += Velocity;
             }
+            _logger.Log(this);
         }
 
         public void Stop() => _running = false;
@@ -140,7 +119,6 @@ namespace Data
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
         }
     }
 }

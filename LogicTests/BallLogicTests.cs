@@ -69,8 +69,9 @@ namespace LogicTests
             var ballB = new Ball(new Vector(60, 50), new Vector(-1, 0), 10, _logger);
             var balls = new List<Ball> { ballA, ballB };
 
-            ballA.StartWorker();
-            ballB.StartWorker();
+            ballA.Start();
+            ballB.Start();
+
             ballLogic.CheckBalls(balls);
 
             Assert.Equal(-1, ballA.Velocity.X, 1);
